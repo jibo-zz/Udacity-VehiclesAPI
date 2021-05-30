@@ -30,9 +30,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 /**
  * Implements testing of the CarController class.
@@ -96,6 +98,11 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
+        Car car = getCar();
+        mvc.perform(get(new URI("/cars")))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$._embedded.carList[0].condition", is(car.getCondition().toString())))
+                .andExpect(jsonPath("$._embedded.carList[0].details.model", is(car.getDetails().getModel())));
 
     }
 
@@ -109,6 +116,11 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+        Car car = getCar();
+        mvc.perform(get(new URI("/cars/1")))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.details.model", is(car.getDetails().getModel())));
     }
 
     /**
@@ -122,6 +134,8 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
+        mvc.perform(delete(new URI("/cars/1")))
+                .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
     }
 
     /**
